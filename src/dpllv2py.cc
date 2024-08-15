@@ -58,6 +58,49 @@ class PeaklimWithPythonExtensions
         auto in_buf = input.request();
         auto out_buf = output.request(true);
 
+        if (in_buf.itemsize != sizeof(float))
+        {
+            std::ostringstream oss;
+            oss << "Input numpy array must have dtype float; you provided an array with "
+                << in_buf.format << "/" << in_buf.size;
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (out_buf.itemsize != sizeof(float))
+        {
+            std::ostringstream oss;
+            oss << "Output numpy array must have dtype float; you provided an array with "
+                << out_buf.format << "/" << out_buf.size;
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (out_buf.ndim != 2)
+        {
+            std::ostringstream oss;
+            oss << "Output numpy array must have 2 dimensions (2, numframes); you provided an "
+                   "array with "
+                << out_buf.ndim << " dimensions";
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (out_buf.shape[0] != 2)
+        {
+            std::ostringstream oss;
+            oss << "Output numpy array must have dimensions (2, numframes); you provided an "
+                   "array with "
+                << out_buf.shape[0] << "x" << out_buf.shape[1];
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
+        if (in_buf.shape != out_buf.shape)
+        {
+            std::ostringstream oss;
+            oss << "Input numpy array dimensions must match output; you provided an "
+                   "array with "
+                << in_buf.shape[0] << "x" << in_buf.shape[1];
+            throw std::invalid_argument(oss.str().c_str());
+        }
+
         auto in_ptr = static_cast<float*>(in_buf.ptr);
         auto out_ptr = static_cast<float*>(out_buf.ptr);
         const auto numframes = out_buf.shape[1]; 
